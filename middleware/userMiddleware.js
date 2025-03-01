@@ -1,24 +1,18 @@
 const jwt = require('jsonwebtoken')
-function auth(req,res,next){
-    const token = req.cookies.token
+function userAuth(req,res,next){
+    const token = req.cookies?.token
 
-    if(token){
-        jwt.verify(token,process.env.JWT_USER_SECRET,function(err,decoded){
-            if(err){
-                res.status(401).json({
-                    msg:"Unauthorized"
-                })
-            }else{
-                req.Id = decoded.Id
-                next()
-            }
-        })
-    }else{
-        res.status(401).json({
-            msg:"Unauthorized"
-        })
+    if(!token){
+        return res.status(401).json({ msg: "No token provided. Unauthorized" });
     }
+    jwt.verify(token,process.env.JWT_USER_SECRET,function(err,decoded){
+        if(err){
+            return res.status(403).json({ msg: "Invalid or expired token. Access denied" });
+        }
+        req.userId = decoded.id
+        next()
+    })
 }
 module.exports = {
-    auth
+    userAuth:userAuth
 }
