@@ -83,7 +83,7 @@ adminRouter.post("/signIn", async function (req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-adminRouter.post("/", adminAuth,async function (req, res) {
+adminRouter.post("/course", adminAuth,async function (req, res) {
   const adminId = req.adminId;
 
   const {title,description,price,imageUrl} = req.body
@@ -100,15 +100,29 @@ adminRouter.post("/", adminAuth,async function (req, res) {
     courseId: newCourse._id})
 });
 
-adminRouter.put("/", function (req, res) {
-  res.json({
-    msg: "user purchase endpoint",
-  });
+adminRouter.put("/updateCourse",adminAuth, async function (req, res) {
+  const adminId = req.adminId
+
+  const {title,description,price,imageUrl} = req.body
+
+  const newCourse = await courseModel.create({
+    title,
+    description,
+    price,
+    imageUrl,
+    adminId
+  })
+
+  res.status(200).json({message: "course is updated successfully"})
 });
-adminRouter.get("/bulk", function (req, res) {
-  res.json({
-    msg: "user purchase endpoint",
-  });
+adminRouter.get("/course/bulk", adminAuth,async function (req, res) {
+  try{
+    const allCourses = await courseModel.find()
+    res.status(200).send(allCourses)
+  }
+  catch(error){
+    res.status(500).json({ message: 'Failed to fetch courses', error: error.message });
+  }
 });
 
 module.exports = {
