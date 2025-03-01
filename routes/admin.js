@@ -103,21 +103,26 @@ adminRouter.post("/course", adminAuth,async function (req, res) {
 adminRouter.put("/updateCourse",adminAuth, async function (req, res) {
   const adminId = req.adminId
 
-  const {title,description,price,imageUrl} = req.body
+  const {title,description,price,imageUrl,courseId} = req.body
 
-  const newCourse = await courseModel.create({
+  await courseModel.updateOne({
+    _id:courseId,
+    creatorId: adminId
+  },{
     title,
     description,
     price,
     imageUrl,
-    adminId
   })
 
   res.status(200).json({message: "course is updated successfully"})
 });
 adminRouter.get("/course/bulk", adminAuth,async function (req, res) {
+  const adminId = req.adminId
   try{
-    const allCourses = await courseModel.find()
+    const allCourses = await courseModel.find({
+      creatorId: adminId
+    })
     res.status(200).send(allCourses)
   }
   catch(error){
