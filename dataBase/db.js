@@ -1,10 +1,7 @@
-require('dotenv').config();
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = mongoose.ObjectId
-console.log("connected to")
 
-mongoose.connect(process.env.DB_CONNECTION_STRING)
 const UserSchema = new Schema({
     email: {type:String , unique:true},
     password:String,

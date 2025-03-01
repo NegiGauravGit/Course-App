@@ -1,6 +1,6 @@
 const Router = require('express')
 const courseRouter = Router()
-const courseModel = require('../db')
+const courseModel = require('../dataBase/db')
 courseRouter.post('/purchase',function(req,res){
     res.json({
         msg:"purchase endpoint"
