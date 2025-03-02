@@ -1,8 +1,8 @@
 const {Router} = require('express')
 const jwt = require('jsonwebtoken')
 const userRouter = Router()
-const {userModel,purchaseModel }= require('../dataBase/db')
-const userMiddleware = require("../middleware/userMiddleware")
+const {userModel,purchaseModel, courseModel }= require('../dataBase/db')
+const {userAuth} = require('../middleware/userMiddleware')
 const bcrypt = require('bcrypt')
 const {z} = require('zod')
 
@@ -76,7 +76,9 @@ userRouter.post('/signIn', async function(req, res) {
             maxAge: 3600000, // 1 hour
         });
 
-        res.status(200).json({ message: "User logged in successfully" });
+        res.status(200).json({ message: "User logged in successfully",
+            token:token
+         });
 
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -87,15 +89,19 @@ userRouter.post('/signIn', async function(req, res) {
     }
 });
 
-userRouter.get('/purchases',userMiddleware,async function(req,res){
+userRouter.get('/purchases',userAuth,async function(req,res){
     const userId = req.userId
 
     const purchaseCourses = await purchaseModel.find({
         userId
     })
 
+    const coursesData = await courseModel.find({
+        _id: {$in: purchaseCourses.map(x => x.courseId)}
+    })
     res.json({
-        purchaseCourses
+        purchaseCourses,
+        coursesData
     })
 })
 

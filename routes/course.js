@@ -1,9 +1,9 @@
 const Router = require('express')
 const courseRouter = Router()
 const {courseModel,purchaseModel} = require('../dataBase/db')
-const userMiddleware = require("../middleware/userMiddleware")
+const {userAuth} = require("../middleware/userMiddleware")
 
-courseRouter.post('/purchase',userMiddleware,async function(req,res){
+courseRouter.post('/purchase',userAuth,async function(req,res){
     const userId = req.userId
     const courseId = req.body.courseId
 
@@ -12,11 +12,10 @@ courseRouter.post('/purchase',userMiddleware,async function(req,res){
         courseId
     })
     res.json({
-        msg:"course is purchased successfully"
+        msg:"you have successfully bought the course"
     })
 })
 courseRouter.get('/preview',async function(req,res){
-    const userId = req.userId
 
     const allCourses = await courseModel.find({})
     res.json({allCourses})
