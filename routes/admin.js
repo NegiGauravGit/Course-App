@@ -4,7 +4,7 @@ const adminRouter = Router();
 const { adminModel, courseModel } = require("../dataBase/db");
 const {z} = require('zod')
 const bcrypt = require('bcrypt')
-const {adminAuth} = require("../middleware/adminMiddleware")
+const {adminAuth} = require("../middleware/adminMiddleware");
 
 const adminInfoSchema = z.object({
     email:z.string().email("Invalid email format"),
@@ -74,7 +74,9 @@ adminRouter.post("/signIn", async function (req, res) {
       maxAge: 3600000, // 1 hour
     });
 
-    res.status(200).json({ message: "Admin logged in successfully" });
+    res.status(200).json({ message: "Admin logged in successfully",
+      token:token
+     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ message: error.errors });
@@ -85,7 +87,7 @@ adminRouter.post("/signIn", async function (req, res) {
 });
 adminRouter.post("/course", adminAuth,async function (req, res) {
   const adminId = req.adminId;
-
+  console.log(adminId)
   const {title,description,price,imageUrl} = req.body
 
   const newCourse = await courseModel.create({
@@ -93,7 +95,7 @@ adminRouter.post("/course", adminAuth,async function (req, res) {
     description,
     price,
     imageUrl,
-    adminId
+    creatorId:adminId
   })
 
   res.status(200).json({message: "course is created successfully",
@@ -105,9 +107,10 @@ adminRouter.put("/updateCourse",adminAuth, async function (req, res) {
   const {title,description,price,imageUrl,courseId} = req.body
 
   try{
-    const foundCourse = await courseModel.find({
-      creatorId:adminId,
-      _id:courseId
+    console.log(courseId)
+    const foundCourse = await courseModel.findOne({
+      _id:courseId,
+      creatorId:adminId
     })
 
     if(!foundCourse){
