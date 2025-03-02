@@ -102,25 +102,36 @@ adminRouter.post("/course", adminAuth,async function (req, res) {
 
 adminRouter.put("/updateCourse",adminAuth, async function (req, res) {
   const adminId = req.adminId
-
   const {title,description,price,imageUrl,courseId} = req.body
 
-  await courseModel.updateOne({
-    _id:courseId,
-    creatorId: adminId
-  },{
-    title,
-    description,
-    price,
-    imageUrl,
-  })
+  try{
+    const foundCourse = await courseModel.find({
+      creatorId:adminId,
+      _id:courseId
+    })
 
-  res.status(200).json({message: "course is updated successfully"})
+    if(!foundCourse){
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    if (title !== undefined) foundCourse.title = title;
+    if (description !== undefined) foundCourse.description = description;
+    if (price !== undefined) foundCourse.price = price;
+    if (imageUrl !== undefined) foundCourse.imageUrl = imageUrl;
+
+    await foundCourse.save()
+    
+    res.status(200).json({message: "course is updated successfully"})
+  }catch(error){
+    console.error("Error updating course:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+
 });
 adminRouter.get("/course/bulk", adminAuth,async function (req, res) {
   const adminId = req.adminId
   try{
-    const allCourses = await courseModel.find({
+    const allCourses = await courseModel.findOne({
       creatorId: adminId
     })
     res.status(200).send(allCourses)
